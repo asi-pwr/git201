@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Michał Zając">
+  <title>Git 201</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <link rel="stylesheet" href="custom.css">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">Git 201</h1>
+  <p class="author">Michał Zając</p>
+  <p class="date">Akademickie Stowarzyszenie Informatyczne</p>
+</section>
+
+<section><section id="agenda" class="titleslide slide level1"><h1>Agenda</h1></section><section id="git-201" class="slide level2">
+<h2>Git 201</h2>
+<ol>
+<li>Authentication methods</li>
+<li>Reverting changes</li>
+<li>Cherry picking</li>
+<li>Rebasing</li>
+<li>Branching models</li>
+<li>Some Git internals</li>
+</ol>
+</section></section>
+<section><section id="authentication-methods" class="titleslide slide level1"><h1>Authentication methods</h1></section><section id="https" class="slide level2">
+<h2>HTTPS</h2>
+<p>Git actually has two modes, Smart and Dumb HTTPS</p>
+</section><section id="ssh" class="slide level2">
+<h2>SSH</h2>
+</section><section id="generating-keys" class="slide level2">
+<h2>Generating keys</h2>
+<p><code>ssh-keygen -t rsa -b 4096 -C "spock@star.trek"</code></p>
+</section><section id="where-are-my-keys" class="slide level2">
+<h2>Where are my keys?</h2>
+<p><code>$HOME/.ssh/id_rsa</code> and <code>$HOME/.ssh/id_rsa.pub</code></p>
+</section><section id="your-private-key-is-really-private" class="slide level2">
+<h2>Your PRIVATE key is really private</h2>
+<p>Don't do dumb shit like this:</p>
+
+<img src="images/private_key.png" alt="Dumb person on the internet sharing his private key" class="stretch"></section><section id="put-your-public-key-on-github" class="slide level2">
+<h2>Put your PUBLIC key on GitHub</h2>
+
+<img src="images/github_ssh_keys.png" alt="How to put your keys on GitHub" class="stretch"></section></section>
+<section><section id="reverting-changes" class="titleslide slide level1"><h1>Reverting changes</h1></section><section id="reverting-local-changes" class="slide level2">
+<h2>Reverting local changes</h2>
+<p>You can do whatever you want, <code>git checkout --</code>, <code>git reset --soft/--hard</code> or even <code>git rebase -i</code>.</p>
+</section><section id="reverting-published-changes" class="slide level2">
+<h2>Reverting published changes</h2>
+<p>If you use something else than <code>git revert</code> then your fellow programmers will find you and kill you.</p>
+</section><section id="main-problem-with-revert" class="slide level2">
+<h2>Main problem with <code>revert</code>
+</h2>
+<p>People don't do atomic changes so reverting stuff is painful.</p>
+</section></section>
+<section><section id="cherry-picking" class="titleslide slide level1"><h1>Cherry picking</h1></section><section id="how" class="slide level2">
+<h2>How?</h2>
+<pre><code>git cherry-pick 09c063</code></pre>
+</section></section>
+<section><section id="rebasing" class="titleslide slide level1"><h1>Rebasing</h1></section><section id="integrating-changes-from-other-branches" class="slide level2">
+<h2>Integrating changes from other branches</h2>
+<p>In Git 101 I covered merging. This time around I will talk about rebasing and when you don't want to use it.</p>
+</section><section id="before-merge" class="slide level2">
+<h2>Before merge</h2>
+
+<img src="images/basic-merge-before.png" alt="Git graph before merge" class="stretch"></section><section id="after-merge" class="slide level2">
+<h2>After merge</h2>
+
+<img src="images/basic-merge-after.png" alt="Git graph after merge" class="stretch"></section><section id="enter-rebase" class="slide level2">
+<h2>Enter rebase</h2>
+<p>We are basically going to take the patch of the change from C4 and reapply it on top of C3.</p>
+<pre><code>$ git checkout experiment
+$ git rebase master</code></pre>
+</section><section id="after-rebase" class="slide level2">
+<h2>After rebase</h2>
+
+<img src="images/basic-rebase-after.png" alt="Git graph after rebase" class="stretch"></section><section id="merging" class="slide level2">
+<h2>Merging</h2>
+<pre><code>$ git checkout master
+$ git merge experiment</code></pre>
+</section><section id="after-merge-1" class="slide level2">
+<h2>After merge</h2>
+
+<img src="images/basic-rebase-after-merge.png" alt="Git graph after merging a rebased branch" class="stretch"></section><section id="rebase-vs.-merge" class="slide level2">
+<h2>Rebase vs. merge</h2>
+<blockquote>
+<p>(...) rebasing makes for a cleaner history. If you examine the log of a rebased branch, it looks like a linear history: it appears that all the work happened in series, even when it originally happened in parallel.</p>
+</blockquote>
+</section><section id="more-convoluted-stuff" class="slide level2">
+<h2>More convoluted stuff</h2>
+
+<img src="images/interesting-rebase-1.png" alt="Git graph with topic branch branched from a topic branch" class="stretch"></section><section id="scenario" class="slide level2">
+<h2>Scenario</h2>
+<p>Let's say we want to apply changes from <code>client</code> branch to <code>master</code> branch but not all the changes from <code>server</code> branch.</p>
+</section><section id="gg-ez" class="slide level2">
+<h2>gg ez</h2>
+<p><code>git rebase --onto master server client</code></p>
+<blockquote>
+<p>This basically says, “Take the client branch, figure out the patches since it diverged from the server branch, and replay these patches in the client branch as if it was based directly off the master branch instead.”</p>
+</blockquote>
+</section><section id="after-rebase-1" class="slide level2">
+<h2>After rebase</h2>
+
+<img src="images/interesting-rebase-2.png" alt="Git graph with topic branch rebased onto master" class="stretch"></section><section id="after-merging" class="slide level2">
+<h2>After merging</h2>
+
+<img src="images/interesting-rebase-3.png" alt="Git graph with topic branch merged into master after rebasing" class="stretch"></section><section id="done-with-the-server" class="slide level2">
+<h2>Done with the server?</h2>
+<pre><code>git rebase master server</code></pre>
+</section><section id="after-rebase-2" class="slide level2">
+<h2>After rebase</h2>
+
+<img src="images/interesting-rebase-4.png" alt="Git graph with base topic branch rebased onto master" class="stretch"></section><section id="after-merge-2" class="slide level2">
+<h2>After merge</h2>
+
+<img src="images/interesting-rebase-5.png" alt="Git graph with base topic merged to master after rebasing" class="stretch"></section><section id="one-simple-rule" class="slide level2">
+<h2>One simple rule</h2>
+<blockquote>
+<p>Do not rebase commits that exist outside your repository.</p>
+</blockquote>
+</section><section id="example-of-stuff-breaking-down" class="slide level2">
+<h2>Example of stuff breaking down</h2>
+</section><section id="scenario-1" class="slide level2">
+<h2>Scenario</h2>
+<p>We clone a repository and do some work on it.</p>
+</section><section id="state" class="slide level2">
+<h2>State</h2>
+
+<img src="images/perils-of-rebasing-1.png" alt="State after cloning and doing some basic work" class="stretch"></section><section id="scenario-2" class="slide level2">
+<h2>Scenario</h2>
+<p>Someone else did some work including a merge and pushed it to the remote server. You pulled the changes and merged them.</p>
+</section><section id="state-1" class="slide level2">
+<h2>State</h2>
+
+<img src="images/perils-of-rebasing-2.png" alt="State after merging upstream changes" class="stretch"></section><section id="scenario-3" class="slide level2">
+<h2>Scenario</h2>
+<p>Now this smartass decided to rebase his work and force pushed it to the server.</p>
+</section><section id="state-2" class="slide level2">
+<h2>State</h2>
+
+<img src="images/perils-of-rebasing-3.png" alt="State after merging upstream changes" class="stretch"></section><section id="scenario-4" class="slide level2">
+<h2>Scenario</h2>
+<p>If you <code>git pull</code> this you will get something like that</p>
+</section><section id="state-3" class="slide level2">
+<h2>State</h2>
+
+<img src="images/perils-of-rebasing-4.png" alt="State after merging upstream changes" class="stretch"></section></section>
+<section><section id="branching-models" class="titleslide slide level1"><h1>Branching models</h1></section><section id="local-branches-only" class="slide level2">
+<h2>Local branches only</h2>
+<p>Not sure why you would want this but why not.</p>
+</section><section id="topic-branches-only" class="slide level2">
+<h2>Topic branches only</h2>
+<p>Dead simple, might not work in some extreme cases. If you are not sure then go with this.</p>
+</section><section id="git-flow" class="slide level2">
+<h2>Git Flow</h2>
+<p>Presented by Vincent Driessen in 2010, makes my head hurt.</p>
+</section><section id="seriously" class="slide level2">
+<h2>Seriously?</h2>
+
+<img src="images/gitflow.png" alt="Git Flow image" class="stretch"></section><section id="explain-this-madness" class="slide level2">
+<h2>Explain this madness!</h2>
+<p>Sure mate, give me two hours or so.</p>
+</section><section id="oneflow" class="slide level2">
+<h2>OneFlow</h2>
+<p>Apparently GitFlow is <a href="http://endoflineblog.com/gitflow-considered-harmful">harmful</a> so Adam Ruka proposed something simpler.</p>
+<p>I didn't use that so I won't comment on it.</p>
+</section></section>
+<section><section id="git-internals" class="titleslide slide level1"><h1>Git internals</h1></section><section id="git-directory" class="slide level2">
+<h2>.git directory</h2>
+<p>Tell me your secrets .git directory!</p>
+<pre><code>ls -F1 .git
+branches/
+config
+description
+HEAD
+hooks/
+info/
+objects/
+refs/</code></pre>
+</section><section id="whats-what" class="slide level2">
+<h2>What's what?</h2>
+<ul>
+<li>
+<code>config</code> - file contains your project-specific configuration options</li>
+<li>
+<code>HEAD</code> - points to the branch we are on</li>
+<li>
+<code>index</code> - stores your staging area information</li>
+<li>
+<code>hooks</code> - directory contains your client- or server-side hook scripts</li>
+<li>
+<code>info</code> - keeps a global exclude file for ignored patterns that you don’t want to track in a <code>.gitignore</code> file</li>
+<li>
+<code>objects</code> - stores all the content</li>
+<li>
+<code>refs</code> - stores pointers into commit objects</li>
+</ul>
+</section><section id="what-are-git-objects" class="slide level2">
+<h2>What are Git objects?</h2>
+<p>Object is basically anything you put into Git. Once something is stored Git gives you a unique key that you can use to retrive it. We can use <code>git hash-object</code> to create new data object and manually store it</p>
+</section><section id="example" class="slide level2">
+<h2>Example</h2>
+<pre><code>$ git init test
+Initialized empty Git repository in /tmp/test/.git/
+$ cd test
+$ find .git/objects
+.git/objects
+.git/objects/info
+.git/objects/pack
+$ find .git/objects -type f</code></pre>
+</section><section id="creating-a-new-entry" class="slide level2">
+<h2>Creating a new entry</h2>
+<pre><code>$ echo 'test content' | git hash-object -w --stdin
+d670460b4b4aece5915caf5c68d12f560a9fe3e4
+$ find .git/objects -type f
+.git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4</code></pre>
+</section><section id="inspecting-the-file" class="slide level2">
+<h2>Inspecting the file</h2>
+<p>It's going to be garbage. Use <code>git cat-file</code> instead.</p>
+</section><section id="example-1" class="slide level2">
+<h2>Example</h2>
+<pre><code>$ git cat-file -p d670460b4b4aece5915caf5c68d12f560a9fe3e4
+test content</code></pre>
+</section><section id="writing-some-more" class="slide level2">
+<h2>Writing some more</h2>
+<pre><code>$ echo 'version 1' &gt; test.txt
+$ git hash-object -w test.txt
+83baae61804e65cc73a7201a7252750c76066a30
+
+$ echo 'version 2' &gt; test.txt
+$ git hash-object -w test.txt
+1f7a7a472abf3dd9643fd615f6da379c4acb3e3a
+
+find .git/objects -type f
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+.git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4</code></pre>
+</section></section>
+<section><section id="finishing-up" class="titleslide slide level1"><h1>Finishing up</h1></section><section id="questions" class="slide level2">
+<h2>Questions?</h2>
+</section><section id="further-reading" class="slide level2">
+<h2>Further reading</h2>
+<ol>
+<li>https://danielkummer.github.io/git-flow-cheatsheet/</li>
+<li>http://endoflineblog.com/oneflow-a-git-branching-model-and-workflow</li>
+<li>https://barro.github.io/2016/02/a-succesful-git-branching-model-considered-harmful/</li>
+<li>https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows</li>
+<li>https://git-scm.com/book/en/v2/Git-Branching-Branch-Management</li>
+<li>https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell</li>
+<li>http://nvie.com/posts/a-successful-git-branching-model/</li>
+<li>https://git-scm.com/book/en/v2/Git-Internals-Plumbing-and-Porcelain</li>
+</ol>
+</section></section>
+<section><section id="thanks-for-your-attention" class="titleslide slide level1"><h1>Thanks for your attention</h1></section></section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable slide navigation via mouse wheel
+        mouseWheel: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+              { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
