@@ -7,6 +7,10 @@ This repository contains materials used for Git 201 talk
 Slides are generated using [Pandoc](https://pandoc.org/), fixed by a small
 Ruby script and powered by [reveal.js](https://revealjs.com/).
 
+## GitHub pages
+
+Slides should be available at http://asi-pwr.github.io/git201/slides/
+
 ## Usage instruction
 
 1. `git clone --recursive https://github.com/asi-pwr/git201.git`
